@@ -1,5 +1,6 @@
 -- PHAN TAO BANG
-CREATE SCHEMA hotel_california;
+DROP SCHEMA IF EXISTS hotel_california;
+CREATE SCHEMA hotel_california DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_vi_0900_as_cs;
 USE hotel_california;
 
 
@@ -8,9 +9,9 @@ USE hotel_california;
 CREATE TABLE branch (
     ID              VARCHAR(5),
     province        VARCHAR(50),
-    address         VARCHAR(200),
-    phoneNumber     VARCHAR(15),
-    email           VARCHAR(100)
+    address         VARCHAR(200) UNIQUE NOT NULL,
+    phoneNumber     VARCHAR(15) UNIQUE NOT NULL,
+    email           VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE branchImage (
@@ -24,9 +25,9 @@ CREATE TABLE sector (
 );
 
 CREATE TABLE roomType (
-    ID              INT AUTO_INCREMENT=1,
-    roomTypeName    VARCHAR(50),
-    roomArea        FLOAT,
+    ID              INT,
+    roomTypeName    VARCHAR(50) UNIQUE NOT NULL,
+    roomArea        FLOAT NOT NULL,
     numberOfGuest   INT NOT NULL,
     description     VARCHAR(100),
     CHECK (numberOfGuest <= 10 AND numberOfGuest >= 1)
@@ -34,9 +35,9 @@ CREATE TABLE roomType (
 
 CREATE TABLE bedInfo (
     roomTypeID      INT,
-    size            DECIMAL(2,1),
+    size            DECIMAL(2,1) NOT NULL,
     quantity        INT NOT NULL DEFAULT 1,
-    CHECK (quantity <= 10 AND quantity >= 1)
+    CHECK (1 <= quantity  AND quantity <= 10)
 );
 
 CREATE TABLE roomTypeOfBranch (
@@ -48,44 +49,44 @@ CREATE TABLE roomTypeOfBranch (
 CREATE TABLE room (
     branchID        VARCHAR(5),
     ID              CHAR(3),
-    roomTypeID      INT,
-    sectorName      VARCHAR(50)    
+    roomTypeID      INT NOT NULL,
+    sectorName      VARCHAR(50) NOT NULL
 );
 
 /* Phần của Đức */
 CREATE TABLE supplyType (
-    ID      CHAR(6),
-    name    VARCHAR(50)
+    ID      CHAR(6) DEFAULT 'VT',
+    name    VARCHAR(50) UNIQUE NOT NULL
 );
 CREATE TABLE supplyTypeInRoomType (
     supplyTypeID    CHAR(6),
     roomTypeID      INT,
     quantity        INT NOT NULL DEFAULT 1 
-        CHECK (1 <= quantity AND quantity <= 20),
+        CHECK (1 <= quantity AND quantity <= 20)
 );
 CREATE TABLE supply (
     branchID        VARCHAR(5),
     supplyTypeID    CHAR(6),
     ID              INT
         CHECK (ID > 0),
-    condition       VARCHAR(100),
-    roomID          CHAR(3) NOT NULL DEFAULT "STO"
+    status       	VARCHAR(100) NOT NULL,
+    roomID          CHAR(3)
 );
 CREATE TABLE supplier (
     ID          CHAR(7),
-    name        VARCHAR(50),
-    email       VARCHAR(100),
-    address     VARCHAR(200)
+    name        VARCHAR(50) UNIQUE NOT NULL,
+    email       VARCHAR(100) UNIQUE NOT NULL,
+    address     VARCHAR(200) UNIQUE NOT NULL
 );
 CREATE TABLE provideSupply (
-    supplierID      CHAR(7),
+    supplierID      CHAR(7) NOT NULL,
     supplyTypeID    CHAR(6),
-    branchID        INT -- REVISE TYPE
+    branchID        VARCHAR(5)
 );
 CREATE TABLE customer (
     ID              CHAR(8),
     IDCardNumber    VARCHAR(12) UNIQUE NOT NULL,
-    name            VARCHAR(150),
+    name            VARCHAR(150) NOT NULL,
     phoneNumber     VARCHAR(15) UNIQUE NOT NULL,
     email           VARCHAR(100) UNIQUE,
     username        VARCHAR(50) UNIQUE,
@@ -100,7 +101,7 @@ CREATE TABLE servicePacket (
     numberOfDays    INT NOT NULL
         CHECK (1 <= numberOfDays AND numberOfDays <= 100),
     numberOfGuests  INT NOT NULL
-        CHECK (1 <= numberOfDays AND numberOfDays <= 10),
+        CHECK (1 <= numberOfGuests AND numberOfGuests <= 10),
     price           INT NOT NULL
 );
 
@@ -110,21 +111,21 @@ CREATE TABLE servicePacketInvoice (
 	customerID      CHAR(8),
 	packetName		VARCHAR(50),
 	buyTime		    DATETIME, 
-	startTime       DATETIME
-        CHECK (startTime > buyTime),
-    totalCost       INT NOT NULL,
+	startTime       DATETIME NOT NULL,
+	CHECK (startTime > buyTime),
+    totalCost       INT NOT NULL
 );
 CREATE TABLE reservation (
-	ID              CHAR(16),
+	ID              CHAR(16),       #check
 	bookingDate		DATETIME NOT NULL,
-    numberOfGuest   INT,
-	checkInDate		DATETIME
-        CHECK (checkInDate > bookingDate),
-	checkOutDate    DATETIME
-        CHECK (checkOutDate > checkInDate),
-    status          CHAR(1) DEFAULT '0',
+    numberOfGuest   INT NOT NULL,
+	checkInDate		DATETIME NOT NULL,
+	CHECK (checkInDate > bookingDate),
+	checkOutDate    DATETIME NOT NULL,
+	CHECK (checkOutDate > checkInDate),
+    status          CHAR(1) NOT NULL DEFAULT '0',
     totalCost       INT NOT NULL DEFAULT 0,
-    customerID      CHAR(8),
+    customerID      CHAR(8) NOT NULL,
     packetName      CHAR(9)
 );
 CREATE TABLE rentedRoom (
@@ -134,20 +135,20 @@ CREATE TABLE rentedRoom (
 );
 CREATE TABLE invoice (
 	ID              CHAR(16),
-	checkInTime     TIME,   #check
-    checkOutTime    TIME,   #check 
-	reservationID   CHAR(16)
+	checkInTime     TIME NOT NULL,   #check
+    checkOutTime    TIME NOT NULL,   #check 
+	reservationID   CHAR(16) NOT NULL
 );
 CREATE TABLE enterprise (
 	ID      CHAR(6),
-	name    VARCHAR(50)
+	name    VARCHAR(50) UNIQUE NOT NULL
 );
 CREATE TABLE service (
 	ID              CHAR(6),
-    type            CHAR(1),    #check
+    type            CHAR(1) NOT NULL,
 	numberOfGuest   INT,
     style           VARCHAR(50),
-    enterpriseID    CHAR(6)
+    enterpriseID    CHAR(6) NOT NULL
 );
 
 /* Phần của Sơn */
@@ -170,8 +171,8 @@ CREATE TABLE lot (
 	branchID	    VARCHAR(5),
     ID	            INT NOT NULL DEFAULT 1
         CHECK (1 <= ID AND ID <= 50),
-    length          FLOAT,
-    width           FLOAT,
+    length          FLOAT NOT NULL,
+    width           FLOAT NOT NULL,
     rentFee		    INT NOT NULL,
     description     VARCHAR(200),
 	serviceID	    CHAR(6),
@@ -189,8 +190,8 @@ CREATE TABLE timeFrame (
 	branchID	    VARCHAR(5),
 	lotID	        INT,
     startTime       TIME,
-    endTime         TIME        #check
-        CHECK (endTime > startTime)
+    endTime         TIME NOT NULL,
+	CHECK (endTime > startTime)
 );
 
 
@@ -215,6 +216,9 @@ ALTER TABLE sector ADD (
 ALTER TABLE roomType ADD (
     PRIMARY KEY(ID)
 );
+ALTER TABLE roomType MODIFY
+    ID      INT AUTO_INCREMENT
+;
 
 ALTER TABLE bedInfo ADD (
     PRIMARY KEY(roomTypeID, size),
@@ -231,7 +235,7 @@ ALTER TABLE roomTypeOfBranch ADD(
 );
 
 ALTER TABLE room ADD (
-    PRIMARY KEY(branchID, roomID),
+    PRIMARY KEY(branchID, ID),
     FOREIGN KEY(branchID, sectorName) REFERENCES sector(branchID, name)
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY(roomTypeID) REFERENCES roomType(ID)
@@ -259,7 +263,7 @@ ALTER TABLE supply ADD (
     FOREIGN KEY (supplyTypeID) REFERENCES supplyType (ID)
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (branchID, roomID) REFERENCES room (branchID, ID)
-        ON DELETE SET DEFAULT ON UPDATE CASCADE
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 ALTER TABLE supplier ADD (
     PRIMARY KEY (ID)
@@ -274,7 +278,7 @@ ALTER TABLE provideSupply ADD (
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 ALTER TABLE customer ADD (
-    PRIMARY KEY (ID),
+    PRIMARY KEY (ID)
 );
 ALTER TABLE servicePacket ADD (
     PRIMARY KEY (name)
@@ -369,5 +373,169 @@ ALTER TABLE timeFrame ADD (
 
 
 
--- TRIIGER BO SUNG DAM BAO CAC RANG BUOC CUA BANG (NEU CO).
-# Kiểm tra lại những chỗ đánh dấu #check
+-- TRIGGER BO SUNG DAM BAO CAC RANG BUOC CUA BANG (NEU CO).
+CREATE TABLE tableID (
+    name       VARCHAR(50),
+    number     INT NOT NULL DEFAULT 1,
+    PRIMARY KEY (name)
+);
+
+INSERT IGNORE INTO tableID(name)
+VALUES
+    ('branch'),
+    ('supplyType'),
+    ('supplier'),
+    ('customer'),
+    ('reservation'),
+    ('invoice'),
+    ('enterprise')
+;
+
+
+DROP TRIGGER IF EXISTS triggerBranchBI;
+DELIMITER #
+CREATE TRIGGER triggerBranchBI
+BEFORE INSERT ON branch
+FOR EACH ROW
+BEGIN
+    SELECT number
+    FROM tableID
+    WHERE name = 'branch'
+    INTO @count;
+    
+    SET NEW.ID = CONCAT('CN', @count);
+
+    UPDATE tableID
+    SET number = number + 1
+    WHERE name = 'branch';
+END#
+DELIMITER ;
+
+
+DROP TRIGGER IF EXISTS triggerSupplyTypeBI;
+DELIMITER #
+CREATE TRIGGER triggerSupplyTypeBI
+BEFORE INSERT ON supplyType
+FOR EACH ROW
+BEGIN
+    SELECT number
+    FROM tableID
+    WHERE name = "supplyType"
+    INTO @count;
+
+    SET NEW.ID = CONCAT('VT', LPAD(@count, 4, 0));
+
+    UPDATE tableID
+    SET number = number + 1
+    WHERE name = "supplyType";
+END#
+DELIMITER ;
+
+
+DROP TRIGGER IF EXISTS triggerSupplierBI;
+DELIMITER #
+CREATE TRIGGER triggerSupplierBI
+BEFORE INSERT ON supplier
+FOR EACH ROW
+BEGIN
+    SELECT number
+    FROM tableID
+    WHERE name = "supplier"
+    INTO @count;
+
+    SET NEW.ID = CONCAT('NCC', LPAD(@count, 4, 0));
+
+    UPDATE tableID
+    SET number = number + 1
+    WHERE name = "supplier";
+END#
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS triggerCustomerBI;
+DELIMITER #
+CREATE TRIGGER triggerCustomerBI
+BEFORE INSERT ON customer
+FOR EACH ROW
+BEGIN
+    SELECT number
+    FROM tableID
+    WHERE name = "customer"
+    INTO @count;
+
+    SET NEW.ID = CONCAT('KH', LPAD(@count, 6, 0));
+
+    UPDATE tableID
+    SET number = number + 1
+    WHERE name = "customer";
+END#
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS triggerRoomBD;
+DELIMITER #3
+CREATE TRIGGER triggerRoomBD
+BEFORE DELETE ON room
+FOR EACH ROW
+BEGIN
+    UPDATE supply
+    SET supply.roomID = NULL
+    WHERE supply.roomID = OLD.ID
+    AND supply.branchID = OLD.branchID;
+END#
+DELIMITER ;
+
+
+DROP TRIGGER IF EXISTS triggerReservationBI;
+DELIMITER #
+CREATE TRIGGER triggerReservationBI
+BEFORE INSERT ON reservation
+FOR EACH ROW
+BEGIN
+    SELECT number FROM tableID WHERE name = "reservation" INTO @ID;
+    SELECT CONCAT("DP", DATE_FORMAT(DATE(NEW.bookingDate), "%d%m%Y"), LPAD(@ID, 6, 0)) INTO @ID;
+	SET NEW.ID = @ID;
+    UPDATE tableID
+        SET number = number + 1
+        WHERE name = "reservation";
+END#
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS triggerInvoiceBI;
+DELIMITER #
+CREATE TRIGGER triggerInvoiceBI
+BEFORE INSERT ON invoice
+FOR EACH ROW
+BEGIN
+    SELECT number FROM tableID WHERE name = "invoice" INTO @ID;
+    SELECT CONCAT("HD", DATE_FORMAT(CURDATE(), "%d%m%Y"), LPAD(@ID, 6, 0)) INTO @ID;
+	SET NEW.ID = @ID;
+    UPDATE tableID
+        SET number = number + 1
+        WHERE name = "invoice";
+END#
+DELIMITER ;
+
+
+DROP TRIGGER IF EXISTS triggerEnterpriseBI;
+DELIMITER #
+CREATE TRIGGER triggerEnterpriseBI
+BEFORE INSERT ON enterprise
+FOR EACH ROW
+BEGIN
+    SELECT number FROM tableID WHERE name = "enterprise" INTO @count;
+    SET NEW.ID = CONCAT('DN', LPAD(@count, 4, 0));
+    UPDATE tableID SET number = number + 1 WHERE name = "enterprise";
+END#
+DELIMITER ;
+
+
+DROP TRIGGER IF EXISTS triggerServiceBI;
+DELIMITER #
+CREATE TRIGGER triggerServiceBI
+BEFORE INSERT ON service
+FOR EACH ROW
+BEGIN
+    SELECT number FROM tableID WHERE name = "service" INTO @count;
+    SET NEW.ID = CONCAT('DV', NEW.type, LPAD(@count, 3, 0));
+    UPDATE tableID SET number = number + 1 WHERE name = "service";
+END#
+DELIMITER ;
