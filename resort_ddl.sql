@@ -55,7 +55,7 @@ CREATE TABLE room (
 
 /* Phần của Đức */
 CREATE TABLE supplyType (
-    ID      CHAR(6) DEFAULT 'VT',
+    ID      CHAR(6),
     name    VARCHAR(50) UNIQUE NOT NULL
 );
 CREATE TABLE supplyTypeInRoomType (
@@ -539,3 +539,78 @@ BEGIN
     UPDATE tableID SET number = number + 1 WHERE name = "service";
 END#
 DELIMITER ;
+
+
+-- INSERT
+/*** INSERT INTO TABLE (sinh dữ liệu cho bảng) ***/
+/* Phần của Đạt */
+-- Chi nhánh
+INSERT INTO branch(province, address, phoneNumber, email)
+VALUES 
+    ('TP. Hồ Chí Minh', '101 Nguyễn Hữu Cảnh, quận Bình Thạnh', '0901234000', 'DukeHaymich@gmail.com'),
+    ('TP. Hồ Chí Minh', '102 Nguyễn Xí, quận Bình Thạnh', '0901234001', 'HaymichDuke@gmail.com'),
+    ('TP. Hồ Chí Minh', '302 Kha Vạn Cân, quận Thủ Đức', '0901234002', 'Typn1911@gmail.com');
+-- Hình ảnh chi nhánh
+INSERT INTO branchImage(branchID, imageURL)
+VALUES
+    ('CN1', '../img/branchlogo/branchno1.png'),
+    ('CN2', '../img/branchlogo/branchno2.png'),
+    ('CN3', '../img/branchlogo/branchno3.png'),
+-- Khu
+INSERT INTO sector(branchID, name)
+VALUES
+    ('CN1', 'Ven sông'),
+    ('CN1', 'Công viên'),
+    ('CN2', 'Chợ')
+;
+-- Loại phòng
+-- Thông tin giường
+-- Chi nhánh có loại phòng
+-- Phòng
+/* Phần của Đức */
+-- Loại vật tư
+INSERT INTO supplyType (name)
+VALUES
+    ("Khăn tắm"),
+    ("Đôi dép"),
+    ("Kem đánh răng"),
+    ("Xà phòng"),
+    ("Tủ quần áo"),
+    ("Tủ đầu giường"),
+    ("Bàn"),
+    ("Ghế"),
+    ("Ấm đun nước"),
+    ("Tủ lạnh"),
+    ("Máy lạnh"),
+    ("Quạt"),
+    ("Tivi")
+    ("Giường"),
+    ("Chăn"),
+    ("Drap"),
+    ("Gối"),
+    ("Nệm")
+;
+-- Loại vật tư trong loại phòng
+-- Vật tư
+-- Nhà cung cấp
+-- Cung cấp vật tư
+-- Khách hàng
+-- Gói dịch vụ
+/* Phần của Minh */
+-- Hoá đơn gói dịch vụ
+-- Đơn đặt phòng
+INSERT INTO reservation (bookingDate,numberOfGuest,checkInDate,checkOutDate,customerID)
+VALUES 
+    ('2021-11-19 13:17:17',5,'2021-11-20 13:17:17','2021-11-30 13:17:17','KH000001'),
+    ('2021-11-15 13:17:17',5,'2021-11-20 13:17:17','2021-11-30 13:17:17','KH000001');
+-- Phòng thuê
+-- Hoá đơn
+-- Doanh nghiệp
+-- Dịch vụ
+/* Phần của Sơn */
+-- Dịch vụ Spa
+-- Loại hàng đồ lưu niệm
+-- Thương hiệu đồ lưu niệm
+-- Mặt bằng
+-- Hình ảnh cửa hàng
+-- Khung giờ hoạt động cửa hàng
