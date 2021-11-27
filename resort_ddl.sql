@@ -26,8 +26,8 @@ CREATE TABLE sector (
 
 CREATE TABLE roomType (
     ID              INT,
-    roomTypeName    VARCHAR(50) UNIQUE NOT NULL,
-    roomArea        FLOAT NOT NULL,
+    name            VARCHAR(50) UNIQUE NOT NULL,
+    area            FLOAT NOT NULL,
     numberOfGuest   INT NOT NULL,
     description     VARCHAR(100),
     CHECK (numberOfGuest <= 10 AND numberOfGuest >= 1)
@@ -113,7 +113,8 @@ CREATE TABLE servicePacketInvoice (
 	buyDate		    DATETIME,
 	startDate       DATETIME NOT NULL,
 	CHECK (startDate > buyDate),
-    totalCost       INT NOT NULL DEFAULT 0
+    totalCost       INT NOT NULL DEFAULT 0,
+    remainingDay    INT NOT NULL DEFAULT 0
 );
 CREATE TABLE reservation (
 	ID              CHAR(16),
@@ -530,6 +531,32 @@ CREATE TRIGGER triggerReservationBI
 BEFORE INSERT ON reservation
 FOR EACH ROW
 BEGIN
+    SET @flag = FALSE;
+	IF (NEW.packetName != NULL) 
+		THEN BEGIN
+			SELECT numberOfGuests FROM servicePacket WHERE name = NEW.packetName INTO @max_guestPacket;
+            SELECT remainingDay FROM servicePacketInvoice WHERE packetName = NEW.packetName AND customerID = NEW.customerID INTO @remainingDay; 
+            IF (@remainingDay = NULL)
+				THEN BEGIN
+					SET @message = CONCAT('Error: You have not registered to this service packet: ',NEW.packetName,' !!!');
+					SET @flag = TRUE;
+				END;
+			ELSEIF (@remainingDay < DATEDIFF(NEW.checkOutDate,NEW.checkInDate))
+				THEN BEGIN
+					SET @message = CONCAT('Error: Exceeding the remaining days (',@remainingDay,' days) of your service packet.');
+					SET @flag = TRUE;
+				END;
+			ELSEIF (NEW.numberOfGuest > @max_guestPacket)
+				THEN BEGIN
+					SET @message = CONCAT('Error: Your service packet only supports up to ',@max_guestPacket,' guests !!!');
+					SET @flag = TRUE;
+				END;
+			END IF;
+		END;
+	END IF;
+    IF (@flag = TRUE)
+		THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = @message;
+    END IF;
     SELECT number FROM tableID WHERE name = "reservation" INTO @ID;
     SELECT CONCAT("DP", DATE_FORMAT(DATE(NEW.bookingDate), "%d%m%Y"), LPAD(@ID, 6, 0)) INTO @ID;
 	SET NEW.ID = @ID;
@@ -538,6 +565,7 @@ BEGIN
         WHERE name = "reservation";
 END#
 DELIMITER ;
+
 
 DROP TRIGGER IF EXISTS triggerEnterpriseBI;
 DELIMITER #
@@ -605,7 +633,7 @@ VALUES
     ('CN6', 'Rừng hoa'),
     ('CN6', 'Đồi');
 -- Loại phòng
-INSERT INTO roomType(roomTypeName, roomArea, numberOfGuest, description)
+INSERT INTO roomType(name, area, numberOfGuest, description)
 VALUES
     ('Đơn thường', 15, 1, 'Phòng dành cho những tấm thân cô đơn, lẻ loi'),
     ('Đôi thường', 20, 2, 'Tha hồ nghịch ong'),
@@ -671,11 +699,11 @@ VALUES
     (7, 'CN5', 2850),
     (8, 'CN5', 3900),
 
-    (1, 'CN6', 1000),
-    (2, 'CN6', 1400),
-    (3, 'CN6', 2400),
-    (4, 'CN6', 290),
-    (5, 'CN6', 4000)
+    (4, 'CN6', 1000),
+    (5, 'CN6', 1400),
+    (6, 'CN6', 2400),
+    (7, 'CN6', 2900),
+    (8, 'CN6', 4000)
 ;
 -- Phòng
 INSERT INTO room
@@ -923,7 +951,7 @@ VALUES
 ;
 INSERT INTO servicePacket
 VALUES
-    ("Ưu đãi gia đình", 5, 8, 1000),
+    ("Ưu đãi gia đình", 7, 8, 1000),
     ("VIP tháng", 31, 4, 3500),
     ("Hoàng gia", 100, 10, 8000)
 ;
