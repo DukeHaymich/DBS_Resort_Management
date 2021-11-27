@@ -70,6 +70,33 @@ BEGIN
 END$$    
 DELIMITER ;
 
+DROP TRIGGER IF EXISTS triggerPointCustomer2;
+DELIMITER $$
+CREATE TRIGGER triggerPointCustomer2
+    AFTER INSERT
+    ON reservation FOR EACH ROW
+BEGIN
+    IF NEW.status = '1' THEN
+        UPDATE customer
+        SET point = point + FLOOR(NEW.totalCost/1000)
+        WHERE ID = NEW.customerID;
+    END IF;
+END$$    
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS triggerPointCustomer3;
+DELIMITER $$
+CREATE TRIGGER triggerPointCustomer3
+    AFTER INSERT
+    ON servicePacketInvoice FOR EACH ROW
+BEGIN
+    UPDATE customer
+    SET point = point + FLOOR(NEW.totalCost/1000)
+    WHERE ID = NEW.customerID;
+END$$    
+DELIMITER ;
+
+
 -- 2.2.1.4 TRIGGER 1.4
 /**/
 DROP TRIGGER IF EXISTS triggerTypeCustomer;
