@@ -106,7 +106,6 @@ END#
 DELIMITER ;
 
 -- 2.2.1.3 TRIGGER 1.3
-
 DROP TRIGGER IF EXISTS triggerReservationAU;
 DELIMITER $$
 CREATE TRIGGER triggerReservationAU

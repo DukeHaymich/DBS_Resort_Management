@@ -1,3 +1,5 @@
+USE hotel_california;
+
 DROP EVENT IF EXISTS eventDeleteReservation;
 DELIMITER #
 CREATE EVENT eventDeleteReservation
@@ -13,12 +15,13 @@ DELIMITER ;
 DROP EVENT IF EXISTS eventCancelReservation;
 DELIMITER #
 CREATE EVENT eventCancelReservation
-ON SCHEDULE EVERY 1 DAY
+ON SCHEDULE EVERY 1 HOUR
 DO BEGIN
     SET @rentDay = DATEDIFF(checkOutDate, checkInDate);
     UPDATE reservation
     SET status = '2' AND totalCost = totalCost*(@rentDay - 1)/@rentDay
     WHERE status = '1'
+    AND TIMESTAMPDIFF(HOUR, checkInDate, NOW()) < 24
     AND NOT EXISTS (
         SELECT *
         FROM invoice
@@ -55,23 +58,17 @@ CREATE PROCEDURE PhongDaThue (
 )
 BEGIN
     SELECT r.ID AS "Mã phòng", r.branchID AS "Chi nhánh", r.sectorName AS "Khu",
-        rT.name AS "Loại phòng", rT.area AS "Diện tích"
-    FROM room r
+        rT.name AS "Loại phòng", rT.area AS "Diện tích", rst.status AS "Tình trạng"
+    FROM reservation rst
+    JOIN rentedRoom rR ON rst.ID = rR.reservationID
+    JOIN room r ON (rR.roomID = r.ID AND rR.branchID = r.branchID)
     JOIN roomType rT ON r.roomTypeID = rT.ID
-    WHERE (r.branchID, r.ID) IN (
-        SELECT branchID, roomID
-        FROM rentedRoom
-        WHERE reservationID IN (
-            SELECT ID
-            FROM reservation
-            WHERE customerID IN (
-                SELECT ID
-                FROM customer c
-                WHERE c.username = username
-                AND c.password = password
-                AND c.IDCardNumber = IDCardNumber
-            )
-        )
+    WHERE rst.customerID IN (
+        SELECT ID
+        FROM customer c
+        WHERE c.IDCardNumber = IDCardNumber
+        AND c.username = username
+        AND c.password = password
     );
 END#
 DELIMITER ;
@@ -86,6 +83,116 @@ BEGIN
     SELECT branchID, SUM(totalCost), SUM(numberOfGuest) 
     FROM rentedRoom a
     LEFT JOIN reservation b ON a.reservationID = b.ID
-    GROUP BY (branchID) 
+    GROUP BY (branchID);
 END#
 DELIMITER ;
+
+
+DROP USER IF EXISTS 'sManager'@'localhost';
+CREATE USER 'sManager'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+GRANT ALL PRIVILEGES ON hotel_california.* TO 'sManager'@'localhost';
+FLUSH PRIVILEGES;
+#SHOW GRANTS FOR 'sManager'@'localhost';
+#2a
+DROP PROCEDURE IF EXISTS getCustomerInfo;
+DELIMITER $$
+CREATE 
+	PROCEDURE getCustomerInfo ()
+    BEGIN
+		SELECT ID,IDCardNumber,name,phoneNumber,email,username,point,type FROM customer;
+	END $$
+DELIMITER ;
+
+#2b
+DROP PROCEDURE IF EXISTS getCustomerInfoByName;
+DELIMITER $$
+CREATE 
+	PROCEDURE getCustomerInfoByName (IN nameIn VARCHAR(100))
+    BEGIN
+		SELECT ID,IDCardNumber,name,phoneNumber,email,username,point,type 
+        FROM customer
+        WHERE LOWER(name) LIKE CONCAT("%",LOWER(nameIn),"%");
+	END $$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS getCustomerReservation;
+DELIMITER $$
+CREATE 
+	PROCEDURE getCustomerReservation (IN customerID CHAR(8))
+    BEGIN
+		SELECT ID,bookingDate,numberOfGuest,checkInDate,checkOutDate,status,totalCost
+        FROM reservation AS r
+        WHERE r.customerID = customerID;
+	END $$
+DELIMITER ;
+
+#2c
+DROP PROCEDURE IF EXISTS insertRoomType;
+DELIMITER $$
+CREATE 
+	PROCEDURE insertRoomType 
+    (
+		roomTypeName 	VARCHAR(50),
+        roomArea      	FLOAT,
+        numberOfGuest   INT,
+        description     VARCHAR(100),
+        OUT roomTypeID 	INT
+	)
+    BEGIN
+		INSERT INTO roomType(roomTypeName,roomArea,numberOfGuest,description)
+        VALUES (roomTypeName,roomArea,numberOfGuest,description);
+        SELECT ID FROM roomType AS r WHERE r.roomTypeName = roomTypeName INTO roomTypeID;
+	END $$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS insertBedInfo;
+DELIMITER $$
+CREATE 
+	PROCEDURE insertBedInfo 
+    (
+		roomTypeID		INT,
+		size            DECIMAL(2,1),
+		quantity        INT
+	)
+    BEGIN
+		INSERT INTO bedInfo(roomTypeID,size,quantity)
+        VALUES (roomTypeID,size,quantity);
+	END $$
+DELIMITER ;
+
+DROP PROCEDURE IF EXISTS insertSupplyTypeInRoomType;
+DELIMITER $$
+CREATE 
+	PROCEDURE insertSupplyTypeInRoomType 
+    (
+		nameSupplyType	VARCHAR(50),
+		roomTypeID      INT,
+		quantity        INT
+	)
+    BEGIN
+		SELECT ID FROM supplyType WHERE name = nameSupplyType INTO @supplyTypeID;
+		INSERT INTO supplyTypeInRoomType(supplyTypeID,roomTypeID,quantity)
+        VALUES (@supplyTypeID,roomTypeID,quantity);
+	END $$
+DELIMITER ;
+
+
+
+
+-- Extra
+/*
+DROP PROCEDURE IF EXISTS getBranch;
+DELIMITER $$
+CREATE 
+	PROCEDURE getBranch 
+    (
+
+	)
+    BEGIN
+		SELECT * 
+        FROM branch
+        LEFT JOIN branchImage
+        ON branch.ID = branchImag
+	END $$
+DELIMITER ;
+/**/
