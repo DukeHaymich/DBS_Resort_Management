@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import DBHelper from "../../../../helpers/DBHelper";
+import './Customer.css';
 
+const customerField =["ID","name","IDCardNumber","phoneNumber","email","username","point","type"];
 function Customer() {
     const DBHelperCtx = useContext(DBHelper);
     const [maxCustomer, setMaxCustomer] = useState(0);
@@ -13,7 +15,7 @@ function Customer() {
 
     const name = useRef();
     const history = useHistory();
-
+    
     function autoSearchHandler() {
         if (name.current.value === "" || maxCustomer < 100) {
             DBHelperCtx.fetchCustomerByName(name.current.value);
@@ -25,30 +27,26 @@ function Customer() {
         DBHelperCtx.fetchCustomerByName(name.current.value);
     }
 
-    function showCustomer(customer) {
+    function showCustomer(customer,idx) {
         return (
-            <tr key={DBHelperCtx.customerList.indexOf(customer)} onClick>
-                <td>{customer["ID"]}</td>
-                <td onClick={()=>{history.pushState("/admin/reservation?customerID="+customer["ID"])}}>{customer["name"]}</td>
-                <td>{customer["IDCardNumber"]}</td>
-                <td>{customer["phoneNumber"]}</td>
-                <td>{customer["email"]}</td>
-                <td>{customer["username"]}</td>
-                <td>{customer["point"]}</td>
-                <td>{customer["type"]}</td>
+            <tr key={idx} style={{cursor:"pointer"}} onClick={()=>
+                {
+                    history.push("/admin/reservation/"+customer["ID"]);
+                }}>
+                    {customerField.map((field,idx)=><td key={idx}>{customer[field]}</td>)}
             </tr>
         );
     }
 
     function showCustomerList() {
         var content = DBHelperCtx.customerList.length
-            ? DBHelperCtx.customerList.map(function(customer) {
-                return showCustomer(customer);
+            ? DBHelperCtx.customerList.map(function(customer,idx) {
+                return showCustomer(customer,idx);
             })
             : null;
 
         return DBHelperCtx.customerList.length
-        ? (<table>
+        ? (<table className = "content-table">
             <thead>
                 <tr>
                     <td>ID</td>
@@ -73,7 +71,7 @@ function Customer() {
             <div className="search-form">
                 <h3>Tìm kiếm</h3>
                 <form onSubmit={searchHandler}>
-                    <label>Họ và tên</label>
+                    <label>Tên khách hàng:</label>
                     <input type="text" placeholder="Nguyễn Văn A" className="box" ref={name} onChange={autoSearchHandler} />
                     <input type="submit" value="Tìm" className="btn" />
                 </form>

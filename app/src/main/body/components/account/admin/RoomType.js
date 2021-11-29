@@ -65,11 +65,17 @@ function RoomType() {
             <div className="insert-form" id="insert-bed-info">
                 <h3>Thêm thông tin giường cho loại phòng</h3>
                 <form onSubmit={insertBedHandler}>
-                    <label>Kích thước</label>
-                    <input type="number" className="box" step="0.1" min="1.6" ref={data.size} />
-                    <label>Số lượng</label>
-                    <input type="number" className="box" min="1" ref={data.quantity} />
-                    <input type="submit" value="Thêm" className="btn" />
+                    <div>
+                        <label>Kích thước:</label>
+                        <input type="number" className="box" step="0.1" min="1.6" ref={data.size} />
+                    </div>
+                    <div>
+                        <label>Số lượng:</label>
+                        <input type="number" className="box" min="1" ref={data.quantity} />
+                    </div>
+                    <div>
+                        <input type="submit" value="Thêm" className="btn" />
+                    </div>
                 </form>
             </div>
         );
@@ -90,13 +96,19 @@ function RoomType() {
             <div className="insert-form" id="insert-supply-type">
                 <h3>Thêm loại vật tư cho loại phòng</h3>
                 <form onSubmit={insertSupplyTypeHandler}>
-                    <label>Tên</label>
-                    <select ref={data.supplyTypeName}>
-                        {showSupplyType()}
-                    </select>
-                    <label>Số lượng</label>
-                    <input type="text" className="box" ref={data.supplyTypeQuantity} />
-                    <input type="submit" value="Thêm" className="btn" />
+                    <div>
+                        <label>Tên:</label>
+                        <select ref={data.supplyTypeName}>
+                            {showSupplyType()}
+                        </select>
+                    </div>
+                    <div>
+                        <label>Số lượng:</label>
+                        <input type="text" className="box" ref={data.supplyTypeQuantity} />
+                    </div>
+                    <div>
+                        <input type="submit" value="Thêm" className="btn" />
+                    </div>
                 </form>
             </div>
         );
@@ -144,22 +156,22 @@ function RoomType() {
                 <h3>Thêm loại phòng</h3>
                 <form onSubmit={insertHandler}>
                     <div>
-                        <label>Tên loại phòng</label>
+                        <label>Tên loại phòng:</label>
                         <input type="text" className="box" ref={data.name} />
                     </div>
                     <div>
-                        <label>Diện tích</label>
+                        <label>Diện tích:</label>
                         <input type="number" className="box" step="0.1" min="10" ref={data.area} />
                     </div>
                     <div>
-                        <label>Số khách tối đa</label>
+                        <label>Số khách tối đa:</label>
                         <input type="number" className="box" min="1" ref={data.maxGuest} />
                     </div>
                     <div>
-                        <label>Mô tả</label>
+                        <label>Mô tả:</label>
                         <textarea className="description" ref={data.description}></textarea>
                     </div>
-                    <input type="submit" value="Thêm" className="btn" />
+                    <div><input type="submit" value="Thêm" className="btn" /></div>
                 </form>
             </div>
             {DBHelperCtx.roomTypeID ? showBedForm() : null}

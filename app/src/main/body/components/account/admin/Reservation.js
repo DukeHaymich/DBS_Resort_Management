@@ -1,40 +1,35 @@
 import React, { useContext, useEffect } from "react";
-import { useParams } from "react-router";
 import DBHelper from "../../../../helpers/DBHelper";
+import { withRouter } from 'react-router';
+import './Reservation.css';
+
+const reservationField=["ID","bookingDate","numberOfGuest","checkInDate","checkOutDate","status","totalCost"];
 
 function Reservation(props) {
     const DBHelperCtx = useContext(DBHelper);
-    let data = useParams();
+
     useEffect(() => {
-        console.log(data);
-        DBHelperCtx.fetchReservationList(data);
+        DBHelperCtx.fetchReservationList(props.match.params.id);
         // eslint-disable-next-line
     }, []);
 
-    function showReservation(reservation) {
+    function showReservation(reservation,idx) {
         return (
-            <tr key={DBHelperCtx.reservationList.indexOf(reservation)}>
-                <td>{reservation["ID"]}</td>
-                <td>{reservation["name"]}</td>
-                <td>{reservation["IDCardNumber"]}</td>
-                <td>{reservation["phoneNumber"]}</td>
-                <td>{reservation["email"]}</td>
-                <td>{reservation["username"]}</td>
-                <td>{reservation["point"]}</td>
-                <td>{reservation["type"]}</td>
+            <tr key={idx}>
+                    {reservationField.map((field,idx)=><td key={idx}>{reservation[field]}</td>)}
             </tr>
         );
     }
 
     function showReservationList() {
         var content = DBHelperCtx.reservationList.length
-            ? DBHelperCtx.reservationList.map(function(reservation) {
-                return showReservation(reservation);
+            ? DBHelperCtx.reservationList.map(function(reservation,idx) {
+                return showReservation(reservation,idx);
             })
             : null;
 
         return DBHelperCtx.reservationList.length
-        ? (<table>
+        ? (<table className = "content-table">
             <thead>
                 <tr>
                     <td>ID</td>
@@ -55,9 +50,10 @@ function Reservation(props) {
 
     return (
         <React.Fragment>
+            <h3 className = "reservation">Đơn đặt phòng</h3>
             {showReservationList()}
         </React.Fragment>
     );
 }
 
-export default Reservation;
+export default withRouter(Reservation);

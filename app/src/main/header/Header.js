@@ -2,7 +2,7 @@ import React, { useRef,useContext, useEffect } from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import Auth from '../helpers/Auth';
 import "./Header.css";
-
+import logo from './images/logo.jpg';
 function Header() {
     const history = useHistory();
     const location = useLocation();
@@ -49,7 +49,7 @@ function Header() {
 
     return (
         <header className="header">
-            <Link to="/" className="logo">{/*<img src={logo} alt=""/>*/}Hotel<span>California</span></Link>
+            <Link to="/" className="logo"><img src={logo} alt=""/>Hotel<span>California</span></Link>
             <nav id="nav-nav" className="navbar" ref={DOMList.navBar}>
                 <Link to="/">Trang chủ</Link>
                 <Link to="/reservation" onClick={Reservation_handle} ref={DOMList.reservation}>Đặt phòng</Link>

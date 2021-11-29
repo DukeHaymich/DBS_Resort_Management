@@ -3,11 +3,15 @@
     height: 100%;
     background-color: #1ba0e2;
     position: fixed;
-    top: 6.5rem;
+    top: 8rem;
     color: white;
     transition: .5s;
     overflow: hidden;
     animation: fadeInLeft .4s linear;
+    z-index: 999;
+}
+.sidebar.active{
+    width: 75px;
 }
 
 .sidebarList{
@@ -22,17 +26,48 @@
     position: absolute;
     display:flex;
     align-items: center;
+    justify-content: center;
     right:20px;
-    top:35px;
+    top:22px;
     font-size: 3rem;
     width: 40px;
     height: 40px;
+    border:2px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+
+}
+#leftArrow.active{
+    display: none;
+}
+
+#rightArrow{
+    position: absolute;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    left:20px;
+    top:22px;
+    font-size: 3rem;
+    width: 40px;
+    height: 40px;
+    border:2px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+    display:none;
+}
+#rightArrow.active{
+    display:flex;
+    animation: fadeInRight .4s linear;
 }
 .sidebarTitle{
     font-size: 2rem;
     color: whitesmoke;
     margin: 3rem 0 3rem 2rem;
-
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+.sidebarTitle.active{
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
 }
 .sidebarListItem{ 
     position: relative;

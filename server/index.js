@@ -126,11 +126,23 @@ app.get("/api/guest/getroom", (req, res)=>{
     });
 });
 
+
+
 app.get("/api/getbranch", (req, res)=>{
     const data = req.body;
     const sqlGet = "CALL getBranch();";
 
     db.query(sqlGet, [data.imageURL, ...data], (err, result)=>{
+        console.log(err);
+    });
+})
+
+app.get("/api/admin/getBranchStatistic", (req, res)=> {
+    const data = req.query;
+    const sqlGet = "CALL ThongKeLuotKhach(?,?);";
+
+    db.query(sqlGet, [data.branchID, data.year], (err, result)=>{
+        res.send(result);
         console.log(err);
     });
 })

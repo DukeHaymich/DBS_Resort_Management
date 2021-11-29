@@ -30,6 +30,9 @@ const DBHelper = createContext({
 
     branchList: [],
     fetchBranchList: ()=>{},
+
+    branchCustomerStatistic: [],
+    fetchBranchCustomerStatisticByIDAndYear: ()=>{}
 })
 
 export function DBHelperProvider(props){
@@ -43,6 +46,7 @@ export function DBHelperProvider(props){
     // const [roomsAvailable, setRoomsAvailable] = useState([]);
     const [roomList, setRoomList] = useState([]);
     const [branchList, setBranchList] = useState([]);
+    const [branchCustomerStatistic, setBranchCustomerStatistic] = useState([]);
     const [loading, setLoading] = useState(false);
 
 
@@ -188,6 +192,21 @@ export function DBHelperProvider(props){
         )
     }
 
+    function fetchBranchCustomerStatisticByIDAndYearHandler(branchID, year) {
+        setLoading(true);
+        Axios.get("http://localhost:3001/api/admin/getBranchStatistic/", {
+            params: {
+                branchID: branchID,
+                year: year
+            }
+        }).then(
+            (response)=>{
+                setBranchCustomerStatistic(response.data[0]);
+                setLoading(false);
+            }
+        )
+    }
+
     const context = {
         loading: loading,
 
@@ -217,6 +236,9 @@ export function DBHelperProvider(props){
 
         branchList: branchList,
         fetchBranchList: fetchBranchListHandler,
+
+        branchCustomerStatistic: branchCustomerStatistic,
+        fetchBranchCustomerStatisticByIDAndYear: fetchBranchCustomerStatisticByIDAndYearHandler
     }
 
     return <DBHelper.Provider value={context}>

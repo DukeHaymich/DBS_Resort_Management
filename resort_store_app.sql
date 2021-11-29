@@ -122,7 +122,9 @@ DELIMITER $$
 CREATE 
 	PROCEDURE getCustomerReservation (IN customerID CHAR(8))
     BEGIN
-		SELECT ID,bookingDate,numberOfGuest,checkInDate,checkOutDate,status,totalCost
+		SELECT ID,DATE_FORMAT(bookingDate,"%d/%m/%Y %H:%i") AS "bookingDate",
+            numberOfGuest,DATE_FORMAT(checkInDate,"%d/%m/%Y %H:%i") AS "checkInDate",
+            DATE_FORMAT(checkOutDate,"%d/%m/%Y %H:%i") AS "checkOutDate",status,totalCost
         FROM reservation AS r
         WHERE r.customerID = customerID AND r.checkInDate >= CURDATE();
 	END $$
