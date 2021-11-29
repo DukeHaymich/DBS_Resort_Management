@@ -136,8 +136,8 @@ CREATE TABLE rentedRoom (
 );
 CREATE TABLE invoice (
 	ID              CHAR(16),
-	checkInTime     TIME NOT NULL,   #check
-    checkOutTime    TIME ,   #modified ################################
+	checkInTime     TIME NOT NULL,
+    checkOutTime    TIME ,
 	reservationID   CHAR(16) NOT NULL
 );
 CREATE TABLE enterprise (
@@ -536,27 +536,13 @@ BEGIN
 		THEN BEGIN
 			SELECT numberOfGuests FROM servicePacket WHERE name = NEW.packetName INTO @max_guestPacket;
             SELECT remainingDay FROM servicePacketInvoice WHERE packetName = NEW.packetName AND customerID = NEW.customerID INTO @remainingDay; 
-            IF (@remainingDay = NULL)
-				THEN BEGIN
-					SET @message = CONCAT('Error: You have not registered to this service packet: ',NEW.packetName,' !!!');
-					SET @flag = TRUE;
-				END;
-			ELSEIF (@remainingDay < DATEDIFF(NEW.checkOutDate,NEW.checkInDate))
-				THEN BEGIN
-					SET @message = CONCAT('Error: Exceeding the remaining days (',@remainingDay,' days) of your service packet.');
-					SET @flag = TRUE;
-				END;
-			ELSEIF (NEW.numberOfGuest > @max_guestPacket)
-				THEN BEGIN
-					SET @message = CONCAT('Error: Your service packet only supports up to ',@max_guestPacket,' guests !!!');
-					SET @flag = TRUE;
-				END;
+            IF (@remainingDay = NULL 
+                OR @remainingDay < DATEDIFF(NEW.checkOutDate,NEW.checkInDate)
+                OR NEW.numberOfGuest > @max_guestPacket)
+				THEN SET NEW.packetName = NULL;
 			END IF;
 		END;
 	END IF;
-    IF (@flag = TRUE)
-		THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = @message;
-    END IF;
     SELECT number FROM tableID WHERE name = "reservation" INTO @ID;
     SELECT CONCAT("DP", DATE_FORMAT(DATE(NEW.bookingDate), "%d%m%Y"), LPAD(@ID, 6, 0)) INTO @ID;
 	SET NEW.ID = @ID;
@@ -1083,3 +1069,39 @@ BEGIN
         WHERE name = "invoice";
 END#
 DELIMITER ;
+
+
+
+
+
+-- Extra Script
+
+-- customer
+INSERT INTO customer
+VALUES
+    ("KH000004", "2222222331", "Joker", "190011113", "iamjoker@gmail.com", "imjoker", 'whysoserious', 888, DEFAULT),
+    ("KH000005", "8914109312", "Boi", "0919992223", "ohboi@gmail.com", "boiboiboi", "222333", 54, DEFAULT),
+    ("KH000006", "8190381903", "Upin", "2467432822", "threetwoone@yahoo.com", "omgomg", "disney123", 1, DEFAULT),
+    ("KH000007", "3824532623", "The Flash", "888888888", "toospeedy@hcmut.edu.vn", "flashsaleman", "richperson123", 1020, DEFAULT)
+;
+-- Đơn đặt phòng
+INSERT INTO reservation (bookingDate,numberOfGuest,checkInDate,checkOutDate,customerID,packetName)
+VALUES 
+	('2021-01-01 20:15:17', 4,'2021-11-29 07:00:00','2021-12-29 16:30:00','KH000001',NULL),
+    ('2021-01-05 08:30:20', 2,'2021-12-12 10:30:00','2022-01-12 19:00:00','KH000002','VIP tháng'),
+    ('2021-02-19 10:20:46', 1,'2021-12-01 08:00:00','2022-03-14 18:00:00','KH000003',NULL),
+	('2021-05-15 14:15:56', 5,'2021-11-28 17:00:00','2022-01-05 06:00:00','KH000001','Hoàng gia'),
+	('2021-11-27 14:17:14', 3,'2021-11-28 17:00:00','2021-12-29 06:00:00','KH000002',NULL),
+	('2021-11-27 08:05:18', 4,'2021-11-28 17:00:00','2021-11-29 12:00:00','KH000003',NULL),
+	('2021-11-29 18:05:30', 1,'2021-11-29 23:59:00','2021-11-30 23:59:00','KH000004',NULL),
+	('2021-11-29 18:06:00', 1,'2021-11-30 00:00:00','2021-11-30 23:59:00','KH000001',NULL),
+	('2021-11-01 12:06:00', 1,'2021-11-30 00:30:00','2021-12-21 23:59:00','KH000005','VIP tháng'),
+	('2021-10-31 13:06:00', 2,'2021-11-22 10:35:03','2022-02-27 23:59:00','KH000003','Ưu đãi gia đình'),
+	('2021-11-26 04:15:16', 5,'2021-11-27 00:00:20','2022-06-22 06:00:00','KH000007','Hoàng gia'),
+	('2021-11-29 09:26:00', 2,'2021-12-30 00:00:00','2022-01-30 21:00:00','KH000006',NULL);
+
+
+
+
+
+

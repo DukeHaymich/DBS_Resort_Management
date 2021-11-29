@@ -73,6 +73,44 @@ header .icons div.active
     background: var(--color-primary-hover);
 }
 
+header #account-setting.active {
+    display: flex;
+}
+
+header .dropdown {
+    position: absolute;
+    display: none;
+    flex-direction: column;
+    top: 90%; right: 7%;
+    background-color: #fff;
+    max-width: 15rem;
+    min-width: 12rem;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 4;
+    animation: fadeInRight .4s linear;
+}
+
+header .dropdown a {
+    text-decoration: none;
+    font-size: 1.5rem;
+    padding: .5rem 1rem;
+    color: var(--black);
+}
+
+header .dropdown hr {
+    border: solid rgba(222, 222, 222, 0.5) 1px;
+    width: 95%;
+    align-self: center;
+}
+
+header .dropdown a:hover {
+    color: var(--color-secondary-hover);
+}
+
+header .dropdown a i {
+    padding-left: 25%;
+}
+
 
 /* media queries  */
 @media (max-width:991px){/* medium device */

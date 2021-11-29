@@ -1,0 +1,12 @@
+.container{
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 6.5rem);
+}
+
+.otherpage{
+    position: fixed;
+    left:300px;
+    width: calc(100% - 300px);
+}

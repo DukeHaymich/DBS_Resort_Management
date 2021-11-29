@@ -58,8 +58,15 @@ BEFORE INSERT ON servicePacketInvoice
 FOR EACH ROW
 BEGIN
     /* TRIGGER 2 */
-    IF EXISTS (SELECT packetName FROM servicePacketInvoice WHERE packetName = NEW.packetName AND DATEDIFF(NEW.startDate,startDate) < 365)
-    THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Warning: This packet is still within the expiry date!!!';
+    IF EXISTS (
+       SELECT packetName
+        FROM servicePacketInvoice
+        WHERE packetName = NEW.packetName
+        AND customerID = NEW.customerID
+        AND DATEDIFF(NEW.startDate,startDate) < 365
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Warning: This packet is still within the expiry date!!!';
     END IF;
     
     /* TRIGGER 1.1 */
@@ -88,7 +95,7 @@ CREATE TRIGGER triggerRentedRoomAI
 AFTER INSERT ON rentedRoom
 FOR EACH ROW
 BEGIN
-	SELECT branchID,roomTypeID FROM room WHERE branchID = NEW.branchID AND roomID = NEW.roomID INTO @branchID,@roomTypeID;
+	SELECT branchID,roomTypeID FROM room WHERE branchID = NEW.branchID AND ID = NEW.roomID INTO @branchID,@roomTypeID;
     SELECT rentFee FROM roomTypeOfBranch WHERE roomTypeID = @roomTypeID AND branchID = @branchID INTO @fee;
     SELECT customerID,packetName FROM reservation WHERE ID = NEW.reservationID INTO @customerID, @packetName;
     SELECT DATEDIFF(checkOutDate,checkInDate) FROM reservation WHERE ID = NEW.reservationID INTO @guestStay;
@@ -171,6 +178,7 @@ DELIMITER ;
 
 -- Test PROCEDURE 1
 CALL GoiDichVu("KH000001");
+
 
 -- Test PROCEDURE 2
 CALL ThongKeLuotKhach("CN1", "2021");

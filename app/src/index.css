@@ -2,7 +2,7 @@
 
 :root{
   --green: #27ae60;
-  --color-primary-hover: #ffb200; /*#f6710d;*/
+  --color-primary-hover: #1ba0e2; /*#f6710d;*/
   --color-secondary-hover: forestgreen;
   --yellow: #eecc00; /*#fad638;*/
   --black: #192a56;
@@ -46,7 +46,7 @@ code {
       transform: translateY(5rem);
       opacity: 0;
   }
-} 
+}
 @keyframes fadeInRight {
   0% {
      opacity: 0;

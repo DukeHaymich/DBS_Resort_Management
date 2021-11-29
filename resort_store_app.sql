@@ -1,12 +1,14 @@
 USE hotel_california;
 
+/* Unlock event by add close-command-mark at the end of this line
+
 DROP EVENT IF EXISTS eventDeleteReservation;
 DELIMITER #
 CREATE EVENT eventDeleteReservation
 ON SCHEDULE EVERY 1 HOUR
 DO BEGIN
     DELETE FROM reservation
-    WHERE TIMESTAMPDIFF(HOUR, checkInDate, NOW()) < 36
+    WHERE TIMESTAMPDIFF(HOUR, NOW(), checkInDate) < 36
     AND status = '0';
 END#
 DELIMITER ;
@@ -21,7 +23,7 @@ DO BEGIN
     UPDATE reservation
     SET status = '2' AND totalCost = totalCost*(@rentDay - 1)/@rentDay
     WHERE status = '1'
-    AND TIMESTAMPDIFF(HOUR, checkInDate, NOW()) < 24
+    AND TIMESTAMPDIFF(HOUR, NOW(), checkInDate) < 24
     AND NOT EXISTS (
         SELECT *
         FROM invoice
@@ -38,7 +40,7 @@ BEFORE UPDATE ON reservation
 FOR EACH ROW
 BEGIN
     IF (OLD.status = '1' AND NEW.status = '2'
-        AND TIMESTAMPDIFF(HOUR, checkInDate, NOW()) < 24)
+        AND TIMESTAMPDIFF(HOUR, NOW(), checkInDate) < 24)
     THEN BEGIN
         SET @rentDay = DATEDIFF(checkOutDate, checkInDate);
         SET NEW.totalCost = NEW.totalCost*(@rentDay - 1)/@rentDay;
@@ -46,14 +48,14 @@ BEGIN
     END IF;
 END#
 DELIMITER ;
-
+/**/
 
 
 DROP PROCEDURE IF EXISTS PhongDaThue;
 DELIMITER #
 CREATE PROCEDURE PhongDaThue (
-    IN  username        VARCHAR(50),
-    IN  password        VARCHAR(100),
+    IN  customerID      CHAR(8),
+    IN  phoneNumber     VARCHAR(15),
     IN  IDCardNumber    VARCHAR(12)
 )
 BEGIN
@@ -67,25 +69,25 @@ BEGIN
         SELECT ID
         FROM customer c
         WHERE c.IDCardNumber = IDCardNumber
-        AND c.username = username
-        AND c.password = password
+        AND c.ID = customerID
+        AND c.phoneNumber = phoneNumber
     );
 END#
 DELIMITER ;
 
 
-DROP PROCEDURE IF EXISTS ThongKeThang;
-DELIMITER #
-CREATE PROCEDURE ThongKeThang (
+-- DROP PROCEDURE IF EXISTS ThongKeThang;
+-- DELIMITER #
+-- CREATE PROCEDURE ThongKeThang (
 
-)
-BEGIN
-    SELECT branchID, SUM(totalCost), SUM(numberOfGuest) 
-    FROM rentedRoom a
-    LEFT JOIN reservation b ON a.reservationID = b.ID
-    GROUP BY (branchID);
-END#
-DELIMITER ;
+-- )
+-- BEGIN
+--     SELECT branchID, SUM(totalCost), SUM(numberOfGuest) 
+--     FROM rentedRoom a
+--     LEFT JOIN reservation b ON a.reservationID = b.ID
+--     GROUP BY (branchID);
+-- END#
+-- DELIMITER ;
 
 
 DROP USER IF EXISTS 'sManager'@'localhost';
@@ -99,7 +101,7 @@ DELIMITER $$
 CREATE 
 	PROCEDURE getCustomerInfo ()
     BEGIN
-		SELECT ID,IDCardNumber,name,phoneNumber,email,username,point,type FROM customer;
+		SELECT ID,name,IDCardNumber,phoneNumber,email,username,point,type FROM customer;
 	END $$
 DELIMITER ;
 
@@ -122,7 +124,7 @@ CREATE
     BEGIN
 		SELECT ID,bookingDate,numberOfGuest,checkInDate,checkOutDate,status,totalCost
         FROM reservation AS r
-        WHERE r.customerID = customerID;
+        WHERE r.customerID = customerID AND r.checkInDate >= CURDATE();
 	END $$
 DELIMITER ;
 
@@ -135,13 +137,12 @@ CREATE
 		roomTypeName 	VARCHAR(50),
         roomArea      	FLOAT,
         numberOfGuest   INT,
-        description     VARCHAR(100),
-        OUT roomTypeID 	INT
+        description     VARCHAR(100)
 	)
     BEGIN
-		INSERT INTO roomType(roomTypeName,roomArea,numberOfGuest,description)
+		INSERT INTO roomType(name,area,numberOfGuest,description)
         VALUES (roomTypeName,roomArea,numberOfGuest,description);
-        SELECT ID FROM roomType AS r WHERE r.roomTypeName = roomTypeName INTO roomTypeID;
+        SELECT ID FROM roomType AS r WHERE r.name = roomTypeName;
 	END $$
 DELIMITER ;
 
@@ -177,7 +178,14 @@ CREATE
 DELIMITER ;
 
 
-
+DROP PROCEDURE IF EXISTS getSupplyType;
+DELIMITER $$
+CREATE 
+	PROCEDURE getSupplyType()
+    BEGIN
+		SELECT * FROM supplyType;
+	END $$
+DELIMITER ;
 
 -- Extra
 /*

@@ -7,6 +7,7 @@ Tiếp đó, khách hàng lựa chọn loại phòng, số lượng phòng mong 
     tự động tính toán */
 
 import { useRef, useContext } from 'react'
+import './FormReservation.css';
 import DBHelper  from '../../helpers/DBHelper';
 
 function FormReservation(props) {
@@ -32,7 +33,7 @@ function FormReservation(props) {
     }
     return (
         <div>
-        <h2>Đăng Ký Đặt Phòng</h2>
+            <h2>Đăng Ký Đặt Phòng</h2>
             <label>CCCD/CMND: </label>
             <input ref={data.ID} />
             <label>Họ tên: </label>

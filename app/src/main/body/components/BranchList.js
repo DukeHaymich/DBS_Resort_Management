@@ -7,42 +7,36 @@ function BranchList() {
     function showBranch(branch) {
         return (
             <div>
-                <li><a>{branch.ID}</a></li>
-                <li>{branch.imageURL}</li>
-                <li>{branch.address}</li>
-                <li>{branch.province}</li>
-                <li>{branch.email}</li>
-                <li>{branch.phoneNumber}</li>
+                <div>
+                    <a><img src={branch.imageURL}/></a>
+                </div>
+                <div>
+                    <li><a>Branch {branch.ID}</a></li>
+                    <li>Address: {branch.address}</li>
+                    <li>{branch.province}</li>
+                    <li>Email: {branch.email}</li>
+                    <li>Phone Number: {branch.phoneNumber}</li>
+                </div>
             </div>
         )
     };
     function showBranchList() {
         DBHelperCtx.fetchBranchList();
-        var content = DBHelperCtx.totalItem
+        var content = DBHelperCtx.branchList.length > 0
         ? DBHelperCtx.branchList.map(function(branch) {
             return showBranch(branch);
         }) 
         : null;
-        return (
-        <div>
-            <div>
-                <li>Branch </li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-                <li></li>
-            </div>
+        return ( 
             <div>
                 {content}
             </div>
-        </div>
         );
     }
     return (
-    <>
-        {showBranchList()}
-    </>);
+        <div>
+            {showBranchList()}
+        </div>
+    );
 }
 export default BranchList;

@@ -5,8 +5,8 @@ import DBHelper from "../../helpers/DBHelper";
 function RoomList(props) {
     const DBHelperCtx = useContext(DBHelper);
     useEffect(() => {
-        DBHelperCtx.fetchRoomList("dukeHaymich", "123456", "9999999999");
-    }, []);
+        DBHelperCtx.fetchRoomList("KH000001", "0987654321", "0123456789");
+    }, [DBHelperCtx]);
 
     function showRoom(room) {
         return (
@@ -28,7 +28,7 @@ function RoomList(props) {
             : null;
 
         return DBHelperCtx.roomList.length
-        ? <table>
+        ? (<table>
             <thead>
                 <tr>
                     <td>Mã phòng</td>
@@ -41,12 +41,12 @@ function RoomList(props) {
             <tbody>
                 {content}
             </tbody>
-        </table>
+        </table>)
         : <h4>You don't have any room ordered yet...</h4>;
     }
 
     return (
-        <div className="list">
+        <div className="list-table">
             {showRoomList()}
         </div>
     );

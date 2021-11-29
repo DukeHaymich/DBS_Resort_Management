@@ -4,10 +4,10 @@ import Header from "./header/Header";
 
 function Main(props) {
     return (
-        <div className="main">
+        <React.Fragment>
             <Header/>
             <Body/>
-        </div>
+        </React.Fragment>
     );
 }
 
